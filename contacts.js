@@ -1,42 +1,49 @@
+
+
+
 import fs from "fs/promises";
 import path from "path";
 import { nanoid } from "nanoid";
 
 const contactsPath = path.resolve("db", "contacts.json");
 
-const writeContacts = contact => fs.writeFile(contactsPath, JSON.stringify(contact, null, 2));
-
-export async function listContacts(){
-    const data = await fs.readFile(contactsPath, "utf-8")
+async function readContacts() {
+    const data = await fs.readFile(contactsPath, 'utf8');
     return JSON.parse(data);
 }
 
-export async function getContactById(contactId){
-    const data = await listContacts();
-    const result = data.find((contact) => contact.id === contactId);
-    return result || null;
+async function writeContacts(contacts) {
+    await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
 }
 
-export async function removeContact(contactId){
-    const data = await listContacts();
-    const index = data.findIndex((contact) => contact.id === contactId);
-    if (index === -1) {
-        return null;
-    }
-    const [result] = data.splice(index, 1);
-    await fs.writeFile(contactsPath, JSON.stringify(data, null, 2));
-    return result;
+export async function listContacts() {
+    return await readContacts();
 }
 
-export async function addContact(name, email, phone){
-    const data = await listContacts();
+export async function getContactById(contactId) {
+    const contacts = await readContacts();
+    const contact = contacts.find(c => c.id === contactId);
+    return contact || null;
+}
+
+export async function removeContact(contactId) {
+    const contacts = await readContacts();
+    const index = contacts.findIndex(c => c.id === contactId);
+    if (index === -1) return null;
+    const [removedContact] = contacts.splice(index, 1);
+    await writeContacts(contacts);
+    return removedContact;
+}
+
+export async function addContact(name, email, phone) {
+    const contacts = await readContacts();
     const newContact = {
         id: nanoid(),
         name,
         email,
-        phone,
+        phone
     };
-    data.push(newContact);
-    await fs.writeFile(contactsPath, JSON.stringify(data, null, 2));
+    contacts.push(newContact);
+    await writeContacts(contacts);
     return newContact;
 }

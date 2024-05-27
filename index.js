@@ -1,5 +1,5 @@
-const { listContacts, getContactById, removeContact, addContact } = require("./contacts.js");
-const { program } = require("commander");
+import { listContacts, getContactById, removeContact, addContact } from "./contacts.js";
+import { program } from "commander";
 
 program
   .option("-a, --action <type>", "choose action")
